@@ -1,0 +1,5 @@
+/tidemark
+/cmd/tidemark/tidemark
+/dist/
+*.test
+*.out
