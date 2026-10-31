@@ -11,4 +11,4 @@ Requires Go 1.22 or later.
 
 ## Status
 
-Only the data model and the `Source` interface exist so far. The commands (`stations`, `today`, `week`, `windows`, `ics`) are planned.
+The data model, the `Source` interface and the NOAA source exist so far. The commands (`stations`, `today`, `week`, `windows`, `ics`) are planned.

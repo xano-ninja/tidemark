@@ -1,0 +1,5 @@
+{"count":3,"units":null,"stations":[
+{"state":"WA","tidepredoffsets":{},"type":"R","timemeridian":0,"reference_id":"9447130","timezonecorr":-8,"id":"9447130","name":"Seattle","lat":47.6026,"lng":-122.3393,"affiliations":"","portscode":"","products":null,"disclaimers":null,"notices":null,"self":null,"expand":null,"tideType":"Mixed","timezone":"PST"},
+{"state":"HI","tidepredoffsets":{},"type":"R","timemeridian":0,"reference_id":"1612340","timezonecorr":-10,"id":"1612340","name":"Honolulu","lat":21.3033,"lng":-157.8645,"affiliations":"","portscode":"","products":null,"disclaimers":null,"notices":null,"self":null,"expand":null,"tideType":"Mixed","timezone":"HAST"},
+{"state":"","tidepredoffsets":{},"type":"S","timemeridian":0,"reference_id":"1630000","timezonecorr":10,"id":"1631428","name":"Pago Bay","lat":13.4283,"lng":144.7967,"affiliations":"","portscode":"","products":null,"disclaimers":null,"notices":null,"self":null,"expand":null,"tideType":"Mixed","timezone":"GUAM"}
+]}
