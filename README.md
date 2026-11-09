@@ -9,6 +9,14 @@ Command-line tide times from NOAA CO-OPS and the Brazilian Navy (DHN) station ta
 
 Requires Go 1.22 or later.
 
+## Usage
+
+    tidemark stations seattle
+    tidemark today 9447130
+    tidemark week 9447130
+
+Times are shown in the station's local zone. Station lists and predictions are cached under the user cache directory (`~/.cache/tidemark` on Linux). Station lists are refetched after seven days; predictions are kept.
+
 ## Status
 
-The data model, the `Source` interface and the NOAA source exist so far. The commands (`stations`, `today`, `week`, `windows`, `ics`) are planned.
+Only the NOAA source is wired up. `windows`, `ics` and the DHN source are planned.
