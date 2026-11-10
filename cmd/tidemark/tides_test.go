@@ -10,7 +10,10 @@ import (
 	"github.com/gustavosilva/tidemark/internal/tide"
 )
 
-type fakeSource struct{ from, to time.Time }
+type fakeSource struct {
+	from, to time.Time
+	es       []tide.Extreme
+}
 
 func (f *fakeSource) Name() string { return "fake" }
 
@@ -20,6 +23,9 @@ func (f *fakeSource) Stations(context.Context) ([]tide.Station, error) {
 
 func (f *fakeSource) Extremes(_ context.Context, _ string, from, to time.Time) ([]tide.Extreme, error) {
 	f.from, f.to = from, to
+	if f.es != nil {
+		return f.es, nil
+	}
 	return []tide.Extreme{
 		{Time: time.Date(2026, 11, 9, 13, 42, 0, 0, time.UTC), Height: -0.31, Kind: tide.Low},
 		{Time: time.Date(2026, 11, 9, 20, 5, 0, 0, time.UTC), Height: 3.12, Kind: tide.High},
