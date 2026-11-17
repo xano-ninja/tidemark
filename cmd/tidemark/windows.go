@@ -41,28 +41,49 @@ func windowsCmd() *cobra.Command {
 	return cmd
 }
 
+type span struct {
+	day, start, end time.Time
+	low             tide.Extreme
+}
+
 func printWindows(ctx context.Context, w io.Writer, src tide.Source, id string, now time.Time, o windowOpts) error {
-	after, err := clock(o.after)
+	st, loc, spans, err := findWindows(ctx, src, id, now, o)
 	if err != nil {
 		return err
+	}
+	fmt.Fprintf(w, "%s (%s), below %.2f m\n", st.Name, st.ID, o.below)
+	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	for _, sp := range spans {
+		fmt.Fprintf(tw, "%s\t%s-%s\t%5.2f m at %s\n",
+			sp.day.Format("Mon 02 Jan"), sp.start.In(loc).Format("15:04"), endClock(sp.end.In(loc), sp.day),
+			sp.low.Height, sp.low.Time.In(loc).Format("Mon 15:04"))
+	}
+	return tw.Flush()
+}
+
+func findWindows(ctx context.Context, src tide.Source, id string, now time.Time, o windowOpts) (tide.Station, *time.Location, []span, error) {
+	var st tide.Station
+	after, err := clock(o.after)
+	if err != nil {
+		return st, nil, nil, err
 	}
 	before, err := clock(o.before)
 	if err != nil {
-		return err
+		return st, nil, nil, err
 	}
 	if after >= before {
-		return fmt.Errorf("--after %s is not before --before %s", o.after, o.before)
+		return st, nil, nil, fmt.Errorf("--after %s is not before --before %s", o.after, o.before)
 	}
 	if o.days < 1 {
-		return fmt.Errorf("--days must be at least 1")
+		return st, nil, nil, fmt.Errorf("--days must be at least 1")
 	}
-	st, err := findStation(ctx, src, id)
+	st, err = findStation(ctx, src, id)
 	if err != nil {
-		return err
+		return st, nil, nil, err
 	}
 	loc, err := time.LoadLocation(st.Timezone)
 	if err != nil {
-		return err
+		return st, nil, nil, err
 	}
 	n := now.In(loc)
 	from := time.Date(n.Year(), n.Month(), n.Day(), 0, 0, 0, 0, loc)
@@ -70,28 +91,23 @@ func printWindows(ctx context.Context, w io.Writer, src tide.Source, id string, 
 	// Pad the fetch so windows crossing the range edges get real start and end times.
 	es, err := src.Extremes(ctx, st.ID, from.Add(-12*time.Hour), to.Add(12*time.Hour))
 	if err != nil {
-		return err
+		return st, nil, nil, err
 	}
 	ws := tide.Below(es, o.below)
 
-	fmt.Fprintf(w, "%s (%s), below %.2f m\n", st.Name, st.ID, o.below)
-	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
+	var out []span
 	for d := 0; d < o.days; d++ {
 		day := from.AddDate(0, 0, d)
 		lo := time.Date(day.Year(), day.Month(), day.Day(), 0, after, 0, 0, loc)
 		hi := time.Date(day.Year(), day.Month(), day.Day(), 0, before, 0, 0, loc)
 		for _, win := range ws {
 			s, e := maxTime(win.Start, lo), minTime(win.End, hi)
-			if !s.Before(e) {
-				continue
+			if s.Before(e) {
+				out = append(out, span{day, s, e, win.Low})
 			}
-			low := win.Low.Time.In(loc)
-			fmt.Fprintf(tw, "%s\t%s-%s\t%5.2f m at %s\n",
-				day.Format("Mon 02 Jan"), s.In(loc).Format("15:04"), endClock(e.In(loc), day),
-				win.Low.Height, low.Format("Mon 15:04"))
 		}
 	}
-	return tw.Flush()
+	return st, loc, out, nil
 }
 
 // clock parses HH:MM into minutes after midnight. 24:00 is allowed.

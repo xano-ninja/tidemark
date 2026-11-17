@@ -27,7 +27,7 @@ func rootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(stationsCmd(), todayCmd(), weekCmd(), windowsCmd())
+	root.AddCommand(stationsCmd(), todayCmd(), weekCmd(), windowsCmd(), icsCmd())
 	return root
 }
 
