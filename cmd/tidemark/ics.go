@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -44,8 +45,10 @@ func writeICS(ctx context.Context, w io.Writer, src tide.Source, id string, now 
 	for _, sp := range spans {
 		fmt.Fprintf(w, "BEGIN:VEVENT\r\nUID:%s-%s@tidemark\r\nDTSTAMP:%s\r\nDTSTART:%s\r\nDTEND:%s\r\nSUMMARY:Tide below %.2f m at %s\r\nDESCRIPTION:Low %.2f m at %s\r\nEND:VEVENT\r\n",
 			st.ID, sp.start.UTC().Format(f), now.UTC().Format(f), sp.start.UTC().Format(f), sp.end.UTC().Format(f),
-			o.below, st.Name, sp.low.Height, sp.low.Time.UTC().Format(f))
+			o.below, icsText.Replace(st.Name), sp.low.Height, sp.low.Time.UTC().Format(f))
 	}
 	_, err = fmt.Fprint(w, "END:VCALENDAR\r\n")
 	return err
 }
+
+var icsText = strings.NewReplacer(`\`, `\\`, ";", `\;`, ",", `\,`, "\n", `\n`)
